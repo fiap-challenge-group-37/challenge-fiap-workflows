@@ -2,6 +2,12 @@ name: CI/CD - Build, Push Docker Image to ECR, and Deploy to EKS
 
 on:
   workflow_call:
+    inputs:
+      ref:
+        required: false
+        type: string
+        default: 'master'
+
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
@@ -10,8 +16,6 @@ on:
       AWS_SESSION_TOKEN:
         required: true
 
-  workflow_dispatch:
-
 jobs:
   build-push-deploy:
     runs-on: ubuntu-latest
@@ -19,7 +23,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha || 'master' }}
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || inputs.ref}}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
