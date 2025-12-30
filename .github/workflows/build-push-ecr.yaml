@@ -16,8 +16,6 @@ on:
       AWS_SESSION_TOKEN:
         required: true
 
-  workflow_dispatch:
-
 jobs:
   build-push-deploy:
     runs-on: ubuntu-latest
