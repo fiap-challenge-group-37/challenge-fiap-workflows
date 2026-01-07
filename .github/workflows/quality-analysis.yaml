@@ -14,7 +14,7 @@ on:
 jobs:
   quality:
     name: Quality Analysis
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -69,7 +69,6 @@ jobs:
 
           if [ -z "$NEW_COVERAGE" ] || [ "$NEW_COVERAGE" = "null" ]; then
             echo "⚠️  Métrica 'new_coverage' não disponível - ignorando validação"
-            echo "::warning::New coverage não encontrado no SonarCloud"
             exit 0
           fi
 
@@ -83,7 +82,6 @@ jobs:
             exit 0
           else
             echo "❌ Coverage insuficiente ($COVERAGE% < $MIN_COVERAGE%)"
-            echo "::error::New Coverage de $COVERAGE% está abaixo de $MIN_COVERAGE%"
             exit 1
           fi
 
@@ -91,10 +89,8 @@ jobs:
         if: always()
         run: |
           if [ "${{ steps.jacoco.outputs.exit_code }}" != "0" ]; then
-            echo "::error title=Coverage abaixo do mínimo::O JaCoCo detectou cobertura insuficiente"
             echo "❌ Coverage mínimo NÃO atingido"
             exit 1
           else
             echo "✅ Coverage mínimo atingido"
           fi
-
