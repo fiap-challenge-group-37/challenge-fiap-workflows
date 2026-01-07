@@ -29,13 +29,13 @@ jobs:
           cache: maven
 
       - name: Build and Test Application
-        run: mvn -B clean verify -Dde.flapdoodle.mongodb.embedded.version=6.0.6
+        run: mvn -B clean verify
 
       - name: JaCoCo Coverage (min 80%)
         id: jacoco
         continue-on-error: true
         run: |
-          mvn -B jacoco:check -Djacoco.failOnViolation=true -Dde.flapdoodle.mongodb.embedded.version=6.0.6
+          mvn -B jacoco:check -Djacoco.failOnViolation=true
           echo "exit_code=$?" >> $GITHUB_OUTPUT
 
       - name: SonarCloud Analysis
@@ -97,3 +97,4 @@ jobs:
           else
             echo "✅ Coverage mínimo atingido"
           fi
+
