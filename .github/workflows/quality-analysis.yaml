@@ -14,7 +14,7 @@ on:
 jobs:
   quality:
     name: Quality Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -97,4 +97,3 @@ jobs:
           else
             echo "✅ Coverage mínimo atingido"
           fi
-
