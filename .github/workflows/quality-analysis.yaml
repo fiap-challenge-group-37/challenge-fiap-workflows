@@ -16,7 +16,6 @@ jobs:
     name: Quality Analysis
     runs-on: ubuntu-latest
     steps:
-      # CORREÇÃO 1: Usar v4 (v6 não existe)
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -29,14 +28,12 @@ jobs:
           distribution: temurin
           cache: maven
 
-      # CORREÇÃO 2: Forçar a versão do Mongo aqui!
       - name: Build and Test Application
         run: mvn -B clean verify -Dde.flapdoodle.mongodb.embedded.version=6.0.6
 
       - name: JaCoCo Coverage (min 80%)
         id: jacoco
         continue-on-error: true
-        # Também passamos a propriedade aqui por segurança, caso o plugin precise subir o contexto
         run: |
           mvn -B jacoco:check -Djacoco.failOnViolation=true -Dde.flapdoodle.mongodb.embedded.version=6.0.6
           echo "exit_code=$?" >> $GITHUB_OUTPUT
@@ -44,7 +41,6 @@ jobs:
       - name: SonarCloud Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        # CORREÇÃO 3: Removida a barra invertida \ sobrando no final
         run: |
           mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.host.url=${{ vars.SONAR_HOST_URL }} \
@@ -73,6 +69,7 @@ jobs:
 
           if [ -z "$NEW_COVERAGE" ] || [ "$NEW_COVERAGE" = "null" ]; then
             echo "⚠️  Métrica 'new_coverage' não disponível - ignorando validação"
+            echo "::warning::New coverage não encontrado no SonarCloud"
             exit 0
           fi
 
@@ -86,6 +83,7 @@ jobs:
             exit 0
           else
             echo "❌ Coverage insuficiente ($COVERAGE% < $MIN_COVERAGE%)"
+            echo "::error::New Coverage de $COVERAGE% está abaixo de $MIN_COVERAGE%"
             exit 1
           fi
 
@@ -93,8 +91,10 @@ jobs:
         if: always()
         run: |
           if [ "${{ steps.jacoco.outputs.exit_code }}" != "0" ]; then
+            echo "::error title=Coverage abaixo do mínimo::O JaCoCo detectou cobertura insuficiente"
             echo "❌ Coverage mínimo NÃO atingido"
             exit 1
           else
             echo "✅ Coverage mínimo atingido"
           fi
+
